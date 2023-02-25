@@ -11,6 +11,7 @@ const {
   getAuthStatus,
   getUsers,
   addUser,
+  deleteUser,
 } = require("./../controllers/users");
 
 const router = Router();
@@ -51,5 +52,7 @@ router.get("/authStatus", auth, getAuthStatus);
 router.get("/", auth, getUsers);
 
 router.post("/", auth, verifyRole, addUser);
+
+router.delete("/", auth, verifyRole, deleteUser);
 
 module.exports = router;

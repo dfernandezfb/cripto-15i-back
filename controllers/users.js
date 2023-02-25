@@ -26,7 +26,7 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { name, lastname, email, age, password } = req.body;
+    const { name, lastname, email, age, password, country } = req.body;
     const salt = await bcrypt.genSalt(10);
     const passwordEncrypted = await bcrypt.hash(password, salt);
     const newUser = new User({
@@ -36,6 +36,7 @@ const register = async (req, res) => {
       age,
       admin: false,
       password: passwordEncrypted,
+      country,
     });
 
     const userSaved = await newUser.save();
@@ -64,7 +65,7 @@ const getAuthStatus = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().populate("country");
     res.status(200).json({ users });
   } catch (error) {
     res.status(error.code || 500).json({
@@ -76,14 +77,17 @@ const getUsers = async (req, res) => {
 
 const addUser = async (req, res) => {
   try {
-    const { name, lastname, age, email, admin, password } = req.body;
+    const { name, lastname, age, email, admin, password, country } = req.body;
+    const salt = await bcrypt.genSalt(10);
+    const passwordEncrypted = await bcrypt.hash(password, salt);
     const newUser = new User({
       name,
       lastname,
       age,
       email,
       admin,
-      password,
+      password: passwordEncrypted,
+      country,
     });
     await newUser.save();
     res.status(201).json({ message: "Se agregó el nuevo usuario con éxito" });
@@ -95,4 +99,25 @@ const addUser = async (req, res) => {
   }
 };
 
-module.exports = { login, register, getAuthStatus, getUsers, addUser };
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const userRemoved = await User.findByIdAndDelete(id);
+    if (!userRemoved) throw new CustomError("No existe tal wachin", 404);
+    res.status(201).json({ message: "El usuario ha sido borrado con éxito" });
+  } catch (error) {
+    res.status(error.code || 500).json({
+      message:
+        error.message || "Ups! Hubo un problema, por favor intenta más tarde",
+    });
+  }
+};
+
+module.exports = {
+  login,
+  register,
+  getAuthStatus,
+  getUsers,
+  addUser,
+  deleteUser,
+};

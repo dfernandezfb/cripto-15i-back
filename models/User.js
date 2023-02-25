@@ -13,6 +13,7 @@ const UserSchema = new Schema(
     },
     email: {
       type: String,
+      unique: [true, "El email ya ha sido registrado"],
     },
     age: {
       type: Number,
@@ -27,6 +28,10 @@ const UserSchema = new Schema(
       type: String,
       trim: true,
       required: [true, "La contraseña es obligatoria"],
+    },
+    country: {
+      type: Schema.Types.ObjectId,
+      ref: "Country",
     },
   },
   {
